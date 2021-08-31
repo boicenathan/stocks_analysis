@@ -17,5 +17,5 @@ interface and run the command `pip install -r config/requirements.txt`.
 Once complete, the program will export the results into the data folder with the current date.
 
 ### Configurations
-By default this script will only run 500 tickers, but if you have a paid plan you can update line 22 to whichever limit you are allowed.
-You can also update line 19 to the price range of the stocks you would like to analyze.
+By default this script will only run 500 tickers, but if you have a paid plan you can update `line 22` to whichever limit you are allowed.
+You can also update `line 19` to the price range of the stocks you would like to analyze.
