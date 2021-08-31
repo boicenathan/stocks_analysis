@@ -130,3 +130,6 @@ dmypy.json
 
 # YAML files
 *.yaml
+
+# Output files
+output*.csv
