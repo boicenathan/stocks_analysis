@@ -133,3 +133,6 @@ dmypy.json
 
 # Output files
 output*.csv
+
+# IDE specific
+.idea
