@@ -10,7 +10,7 @@ def main():
     today = today.replace('-', '.')
 
     # Get list of tickers from downloaded file
-    symbols = pd.read_csv('data/symbols.csv', usecols=['Symbol', 'Last Sale', 'Market Cap'])  # https://www.nasdaq.com/market-activity/stocks/screener
+    symbols = pd.read_csv('data/symbols.csv', usecols=['Symbol', 'Last Sale', 'Market Cap'])
     symbols['Last Sale'] = symbols['Last Sale'].str.replace('$', '', regex=True).astype(float)
     symbols = symbols[(symbols['Last Sale'] >= 10) & (symbols['Last Sale'] <= 5000)]
     symbols.sort_values('Market Cap', axis=False, ascending=False, inplace=True, na_position='last')
