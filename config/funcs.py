@@ -52,7 +52,7 @@ def get_info(tickers):
             elif int(response.status_code) == 429:
                 heads = response.headers
                 reset_sec = int(heads['X-RateLimit-requests-Reset'])
-                reset = round(((reset_sec / 60) / 60) / 24)
+                reset = round(((reset_sec / 60) / 60) / 24, 1)
                 print(f"Request limit reached, try again in {reset} days.")
                 break
             else:
