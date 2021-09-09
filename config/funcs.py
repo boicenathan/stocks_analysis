@@ -30,6 +30,7 @@ def get_info(tickers):
             url = f"https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/v2/get-analysis?symbol={tick}&region=US"
             start = time()
             response = requests.get(url, headers=headers, timeout=10)
+            # Checking if the status code is success
             if int(response.status_code) == 200:
                 # Collecting info
                 data = json.loads(response.text)
@@ -49,12 +50,13 @@ def get_info(tickers):
                                                      mean_diffp, med_diff, mean_diff, recommendation]
                 # Waiting if faster than .2 seconds
                 sleep(wait_time(start))
+            # If request limit is reached
             elif int(response.status_code) == 429:
-                heads = response.headers
-                reset_sec = int(heads['X-RateLimit-requests-Reset'])
+                reset_sec = int(response.headers['X-RateLimit-requests-Reset'])
                 reset = round(((reset_sec / 60) / 60) / 24, 1)
                 print(f"Request limit reached, try again in {reset} days.")
                 break
             else:
                 print(f"Status code: {response.status_code}")
+                break
     return final_df
