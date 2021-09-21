@@ -34,12 +34,12 @@ def get_info(tickers):
                     # Collecting info
                     stock = {}
                     data = json.loads(response.text)
-                    stock['name'] = data['price']['longName']
+                    stock['name'] = data['price'].get('longName')
                     stock['prev_close'] = data['summaryDetail']['previousClose'].get('raw', np.nan)
                     stock['low_target'] = data['financialData']['targetLowPrice'].get('raw', np.nan)
                     stock['avg_target'] = data['financialData']['targetMeanPrice'].get('raw', np.nan)
                     stock['high_target'] = data['financialData']['targetHighPrice'].get('raw', np.nan)
-                    stock['recommendation'] = data['financialData']['recommendationKey']
+                    stock['recommendation'] = data['financialData'].get('recommendationKey', np.nan)
                     # Calculating and formatting
                     recommendation = stock['recommendation'].replace('_', ' ')
                     low_diff = round(stock['low_target'] - stock['prev_close'], 2)
