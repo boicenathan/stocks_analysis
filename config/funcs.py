@@ -20,7 +20,7 @@ def wait_time(start):
 def get_info(tickers):
     final_df = pd.DataFrame(columns=['Ticker', 'Name', 'PreviousClose', 'LowTargetPrice', 'AvgTargetPrice',
                                      'HighTargetPrice', 'LowDifference%', 'AvgDifference%', 'HighDifference%',
-                                     'LowDifference', 'AvgDifference', 'HighDifference', 'Recommendation'])
+                                     'LowDifference', 'AvgDifference', 'HighDifference', 'Risk', 'Recommendation'])
     with open('config/parameters.yaml') as f:
         creds = safe_load(f)
         headers = {'x-rapidapi-key': creds['key'], 'x-rapidapi-host': creds['host']}
@@ -48,11 +48,12 @@ def get_info(tickers):
                     avg_diffp = round((avg_diff / stock['prev_close']) * 100, 1)
                     high_diff = round(stock['high_target'] - stock['prev_close'], 2)
                     high_diffp = round((high_diff / stock['prev_close']) * 100, 1)
+                    risk = round((((avg_diffp + high_diffp) / 2) + low_diffp) / 100, 2)
                     # Adding to dataframe
                     final_df.loc[len(final_df.index)] = [tick, stock['name'], stock['prev_close'], stock['low_target'],
                                                          stock['avg_target'], stock['high_target'], low_diffp,
                                                          avg_diffp, high_diffp, low_diff, avg_diff, high_diffp,
-                                                         recommendation]
+                                                         risk, recommendation]
                 except KeyError as error:
                     print(f"KeyError: {error} for {tick}")
                     continue
