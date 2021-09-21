@@ -24,12 +24,11 @@ def main():
         print("Getting stock info...")
         final_df = get_info(tickers)
         if len(final_df.index) > 0:
-            final_df.sort_values('MeanDifference%', axis=False, ascending=False, inplace=True, na_position='last')
-            cols = ['MedDifference%', 'MeanDifference%']
+            final_df.sort_values('AvgDifference%', axis=False, ascending=False, inplace=True, na_position='last')
+            cols = ['LowDifference%', 'AvgDifference%', 'HighDifference%']
             final_df[cols] = final_df[cols].astype(str) + "%"
             final_df.to_csv(f'data/output_{today}.csv', index=False)
-            print(f"Analysis complete"
-                  f"\n{final_df.head(5)}")
+            print(f"Analysis complete for {len(final_df.index)} stocks")
 
 
 if __name__ == '__main__':
