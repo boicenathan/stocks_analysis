@@ -20,7 +20,8 @@ def wait_time(start):
 def get_info(tickers):
     final_df = pd.DataFrame(columns=['Ticker', 'Name', 'PreviousClose', 'LowTargetPrice', 'AvgTargetPrice',
                                      'HighTargetPrice', 'LowDifference%', 'AvgDifference%', 'HighDifference%',
-                                     'LowDifference', 'AvgDifference', 'HighDifference', 'Risk', 'Recommendation'])
+                                     'LowDifference', 'AvgDifference', 'HighDifference', 'Risk', 'Recommendation',
+                                     'NumberOfAnalysts'])
     with open('config/parameters.yaml') as f:
         creds = safe_load(f)
         headers = {'x-rapidapi-key': creds['key'], 'x-rapidapi-host': creds['host']}
@@ -40,6 +41,7 @@ def get_info(tickers):
                     stock['avg_target'] = data['financialData']['targetMeanPrice'].get('raw', np.nan)
                     stock['high_target'] = data['financialData']['targetHighPrice'].get('raw', np.nan)
                     stock['recommendation'] = data['financialData'].get('recommendationKey', np.nan)
+                    stock['num_analysts'] = data['numberOfAnalystOpinions'].get('recommendationKey', np.nan)
                     # Calculating and formatting
                     recommendation = stock['recommendation'].replace('_', ' ')
                     low_diff = round(stock['low_target'] - stock['prev_close'], 2)
@@ -53,7 +55,7 @@ def get_info(tickers):
                     final_df.loc[len(final_df.index)] = [tick, stock['name'], stock['prev_close'], stock['low_target'],
                                                          stock['avg_target'], stock['high_target'], low_diffp,
                                                          avg_diffp, high_diffp, low_diff, avg_diff, high_diffp,
-                                                         risk, recommendation]
+                                                         risk, recommendation, stock['num_analysts']]
                 except KeyError as error:
                     print(f"KeyError: {error} for {tick}")
                     continue
