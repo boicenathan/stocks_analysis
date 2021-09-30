@@ -69,10 +69,37 @@ def get_info(tickers):
             # If request limit is reached
             elif int(response.status_code) == 429:
                 reset_sec = int(response.headers['X-RateLimit-requests-Reset'])
-                reset = round(((reset_sec / 60) / 60) / 24, 1)
+                reset = round(reset_sec / 86400, 1)
                 print(f"Request limit reached, try again in {reset} days.")
                 break
             else:
                 print(f"Status code: {response.status_code}")
                 break
     return final_df
+
+
+def historic_info(tickers, merged):
+    checking_df = pd.DataFrame(columns=['Ticker', 'LastClose', 'CloseDate', 'TargetReached', 'TargetReachDate'])
+    for tick in tickers:
+        hit_target, hit_date = [], []
+        temp_df = merged[merged['Ticker'] == tick]
+        closes = temp_df['PreviousClose'].tolist()
+        targets = temp_df['AvgTargetPrice'].tolist()
+        dates = temp_df['Rundate'].tolist()
+        for price in closes:
+            for target in targets:
+                if price >= target:
+                    hit_target.append("Yes")
+                    r_index = price.index()
+                    run_date = dates[r_index]
+                    h_index = target.index()
+                    hit_date.append(dates[h_index])
+                else:
+                    hit_target.append("No")
+                    hit_date.append(np.nan)
+        checking_df.loc[len(checking_df.index)] = [tick, price, run_date, hit_target, hit_date]
+
+        # Calculate time difference and add it to the dataframe
+        time_diff = (checking_df.hit_date - checking_df.run_date).days
+        checking_df['TimeToHit'] = time_diff
+    return checking_df

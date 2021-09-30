@@ -1,14 +1,29 @@
 ### Analyze Historical Calculations ###
-import os
+from config.funcs import historic_info
+
 import glob
+import pandas as pd
 
 
 def historic():
-    # Get a list of all the paths and base file names
+    # Merge all historic files
     paths = glob.glob('data/output_*.csv')
-    files = [os.path.basename(x) for x in paths]
-    files.sort(reverse=True)
+    data = [pd.read_csv(p, sep=',') for p in paths]
+    merged_df = pd.concat(data, ignore_index=True)
 
+    # Separate most recent analysis
+    merged_df['Rundate'] = pd.to_datetime(merged_df['Rundate'])
+    merged_df.sort_values(by=['Rundate'], inplace=True, ascending=False)
+    recent_df = merged_df[merged_df['Rundate'] == merged_df['Rundate'].max()]
+
+    # Make list of tickers
+    tickers = set(merged_df['Ticker'].tolist())
+
+    # Start historical comparison
+    analysis = historic_info(tickers, merged_df)
+
+    # Save dataframe
+    analysis.to_csv('data/Tracker.csv', index=False)
     print('done')
 
 

@@ -21,3 +21,6 @@ This script will run as many tickers as it can until it recieves a `429` status 
 I use the basic free API plan which limits to 500 requests per month and 5 requests per second.  There is a function in 
 the program that calculates the time between requests and will pause if it goes too fast.  You can also update `line 15` 
 to the price range of the stocks you would like to analyze.
+
+The `historical.py` script will take the outputs from the regular pulls and check if the last closing price has met the
+target price and if so, when.
