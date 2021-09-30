@@ -14,7 +14,6 @@ def historic():
     # Separate most recent analysis
     merged_df['Rundate'] = pd.to_datetime(merged_df['Rundate'])
     merged_df.sort_values(by=['Rundate'], inplace=True, ascending=False)
-    recent_df = merged_df[merged_df['Rundate'] == merged_df['Rundate'].max()]
 
     # Make list of tickers
     tickers = set(merged_df['Ticker'].tolist())
@@ -24,7 +23,7 @@ def historic():
 
     # Save dataframe
     analysis.to_csv('data/Tracker.csv', index=False)
-    print('done')
+    print("Historical analysis complete")
 
 
 if __name__ == '__main__':
