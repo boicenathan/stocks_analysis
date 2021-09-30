@@ -1,14 +1,14 @@
 ### Program to calculate the the difference between last close price and target prices ###
+from config.funcs import get_info
+
 from datetime import date
 import pandas as pd
 
-from config.funcs import get_info
-
 
 def main():
-    today = str(date.today())
-    today = today.replace('-', '.')
-    df_date = today.replace('.', '/')
+    now = date.today()
+    today = now.strftime("%Y.%m.%d")
+    df_date = now.strftime("%Y/%m/%d")
 
     # Get list of tickers from downloaded file
     symbols = pd.read_csv('data/symbols.csv', usecols=['Symbol', 'Last Sale', 'Market Cap'])
