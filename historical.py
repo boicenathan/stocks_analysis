@@ -15,10 +15,8 @@ def historic():
     merged_df['Rundate'] = pd.to_datetime(merged_df['Rundate'])
     merged_df.sort_values(by=['Rundate'], inplace=True, ascending=False)
 
-    # Make list of tickers
+    # Make list of tickers and start historicl analysis
     tickers = set(merged_df['Ticker'].tolist())
-
-    # Start historical comparison
     analysis = historic_info(tickers, merged_df)
 
     # Save dataframe
