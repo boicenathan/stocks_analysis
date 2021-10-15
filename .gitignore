@@ -132,7 +132,7 @@ dmypy.json
 *.yaml
 
 # Output files
-output*.csv
+*output*.csv
 
 # IDE specific
 .idea

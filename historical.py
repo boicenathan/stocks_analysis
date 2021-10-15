@@ -21,7 +21,7 @@ def historic():
 
     # Save dataframe
     analysis.to_csv('data/Tracker.csv', index=False)
-    print("Historical analysis complete")
+    print('Historical analysis complete')
 
 
 if __name__ == '__main__':
