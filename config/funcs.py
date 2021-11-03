@@ -1,10 +1,10 @@
 ### Functions ###
 from time import time, sleep
-from yaml import safe_load
 import pandas as pd
 import numpy as np
 import requests
 import json
+import os
 
 
 def wait_time(start):
@@ -22,72 +22,72 @@ def get_info(tickers, dev):
                                      'HighTargetPrice', 'LowDifference%', 'AvgDifference%', 'HighDifference%',
                                      'LowDifference', 'AvgDifference', 'HighDifference', 'Risk', 'Recommendation',
                                      'NumberOfAnalysts'])
-    with open('config/parameters.yaml') as f:
-        creds = safe_load(f)
-        headers = {'x-rapidapi-key': creds['key'], 'x-rapidapi-host': creds['host']}
-        for count, tick in enumerate(tickers):
-            url = f'https://apidojo-yahoo-finance-v1.p.rapidapi.com/stock/v2/get-analysis?symbol={tick}&region=US'
-            start = time()
-            response = requests.get(url, headers=headers, timeout=10)
-            # Checking if the status code is success
-            if int(response.status_code) == 200:
-                try:
-                    # Collecting info
-                    stock = {}
-                    data = json.loads(response.text)
-                    financialdata = data.get('financialData')
-                    stock['name'] = data['price'].get('longName')
-                    stock['prev_close'] = data['summaryDetail']['previousClose'].get('raw', np.nan)
-                    stock['low_target'] = financialdata['targetLowPrice'].get('raw', np.nan)
-                    stock['avg_target'] = financialdata['targetMeanPrice'].get('raw', np.nan)
-                    stock['high_target'] = financialdata['targetHighPrice'].get('raw', np.nan)
-                    stock['recommendation'] = financialdata.get('recommendationKey', np.nan)
-                    stock['num_analysts'] = financialdata['numberOfAnalystOpinions'].get('raw', np.nan)
-                    # Calculating and formatting
-                    low_target, avg_target, high_target, prev_close = (stock['low_target'], stock['avg_target'],
-                                                                       stock['high_target'], stock['prev_close'])
-                    low_diff = round(low_target - prev_close, 2)
-                    low_diffp = round((low_diff / prev_close) * 100, 1)
-                    avg_diff = round(avg_target - prev_close, 2)
-                    avg_diffp = round((avg_diff / prev_close) * 100, 1)
-                    high_diff = round(high_target - prev_close, 2)
-                    high_diffp = round((high_diff / prev_close) * 100, 1)
-                    risk = round((((avg_diffp + high_diffp) / 2) + low_diffp) / 100, 2)
-                    # Adding to dataframe
-                    final_df.loc[len(final_df.index)] = [tick, stock['name'], stock['prev_close'], stock['low_target'],
-                                                         stock['avg_target'], stock['high_target'], low_diffp,
-                                                         avg_diffp, high_diffp, low_diff, avg_diff, high_diff,
-                                                         risk, stock['recommendation'], stock['num_analysts']]
-                except KeyError as error:
-                    print(f'KeyError: {error} for {tick}')
-                    continue
-                # Waiting if faster than .2 seconds
-                sleep(wait_time(start))
-            # If request limit is reached
-            elif int(response.status_code) == 429:
-                reset = round(int(response.headers['X-RateLimit-requests-Reset']) / 86400, 1)
-                print(f'Request limit reached, try again in {reset} days.')
-                break
-            # Stops before limit is reached if testing for further development is needed
-            elif int(response.headers['x-ratelimit-requests-remaining']) <= 50:
-                if dev:
-                    print(f'{int(response.headers["x-ratelimit-requests-remaining"])}')
-                else:
-                    print(f'Stopping at 50 or less requests remaining.')
-                    break
-            # Break if the status code is in the 400's
-            elif (int(response.status_code) >= 400) and (int(response.status_code) < 500):
-                break
-            else:
-                print(f'Status code: {response.status_code}')
+    headers = {'x-rapidapi-key': os.environ.get('YAHOO_API_KEY'), 'x-rapidapi-host': os.environ.get('YAHOO_API_HOST')}
+    for count, tick in enumerate(tickers):
+        start = time()
+        response = requests.get(
+            f'https://yh-finance.p.rapidapi.com/stock/v2/get-analysis?symbol={tick}&region=US',
+            headers=headers,
+            timeout=10)
+        # Checking if the status code is success
+        if int(response.status_code) == 200:
+            try:
+                # Collecting info
+                stock = {}
+                data = json.loads(response.text)
+                financialdata = data.get('financialData')
+                stock['name'] = data['price'].get('longName')
+                stock['prev_close'] = data['summaryDetail']['previousClose'].get('raw', np.nan)
+                stock['low_target'] = financialdata['targetLowPrice'].get('raw', np.nan)
+                stock['avg_target'] = financialdata['targetMeanPrice'].get('raw', np.nan)
+                stock['high_target'] = financialdata['targetHighPrice'].get('raw', np.nan)
+                stock['recommendation'] = financialdata.get('recommendationKey', np.nan)
+                stock['num_analysts'] = financialdata['numberOfAnalystOpinions'].get('raw', np.nan)
+                # Calculating and formatting
+                low_target, avg_target, high_target, prev_close = (stock.get('low_target'), stock.get('avg_target'),
+                                                                   stock.get('high_target'), stock.get('prev_close'))
+                low_diff = round(low_target - prev_close, 2)
+                low_diffp = round((low_diff / prev_close) * 100, 1)
+                avg_diff = round(avg_target - prev_close, 2)
+                avg_diffp = round((avg_diff / prev_close) * 100, 1)
+                high_diff = round(high_target - prev_close, 2)
+                high_diffp = round((high_diff / prev_close) * 100, 1)
+                risk = round((((avg_diffp + high_diffp) / 2) + low_diffp) / 100, 2)
+                # Adding to dataframe
+                final_df.loc[len(final_df.index)] = [tick, stock['name'], stock['prev_close'], stock['low_target'],
+                                                     stock['avg_target'], stock['high_target'], low_diffp,
+                                                     avg_diffp, high_diffp, low_diff, avg_diff, high_diff,
+                                                     risk, stock['recommendation'], stock['num_analysts']]
+            except KeyError as error:
+                print(f'KeyError: {error} for {tick}')
                 continue
+            # Waiting if faster than .2 seconds
+            sleep(wait_time(start))
+        # If request limit is reached
+        elif int(response.status_code) == 429:
+            reset = round(int(response.headers['X-RateLimit-requests-Reset']) / 86400, 1)
+            print(f'Request limit reached, try again in {reset} days.')
+            break
+        # Stops before limit is reached if testing for further development is needed
+        elif int(response.headers['x-ratelimit-requests-remaining']) <= 50:
+            if dev:
+                print(f'{int(response.headers["x-ratelimit-requests-remaining"])}')
+            else:
+                print(f'Stopping at 50 or less requests remaining.')
+                break
+        # Break if the status code is in the 400's
+        elif (int(response.status_code) >= 400) and (int(response.status_code) < 500):
+            break
+        else:
+            print(f'Status code: {response.status_code}')
+            continue
     return final_df
 
 
 def historic_info(tickers, merged):
     checking_df = pd.DataFrame(columns=['Ticker', 'LastClose', 'CloseDate', 'TargetReached', 'TargetReachDate'])
     for tick in tickers:
-        hit_target, hit_date = [], []
+        hit_target = hit_date = []
         temp_df = merged[merged['Ticker'] == tick]
         closes, targets, dates = (temp_df['PreviousClose'].tolist(), temp_df['AvgTargetPrice'].tolist(),
                                   temp_df['Rundate'].tolist())
@@ -102,7 +102,8 @@ def historic_info(tickers, merged):
                 else:
                     hit_target.append('No')
                     hit_date.append(np.nan)
-        checking_df.loc[len(checking_df.index)] = [tick, price, run_date, hit_target, hit_date]
+                    run_date.append(np.nan)
+            checking_df.loc[len(checking_df.index)] = [tick, price, run_date, hit_target, hit_date]
 
         # Calculate time difference and add it to the dataframe
         checking_df['TimeToHit'] = (checking_df.hit_date - checking_df.run_date).days

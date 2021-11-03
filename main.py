@@ -7,7 +7,7 @@ import pandas as pd
 
 def main():
     # Dev toggle
-    dev = True
+    dev = False
 
     now = date.today()
     today, df_date = now.strftime('%Y.%m.%d'), now.strftime('%Y/%m/%d')
@@ -26,7 +26,8 @@ def main():
     # Running program to get stock and analyst info
     print(f'Running for {len(tickers)} stocks...')
     final_df = get_info(tickers, dev)
-    if len(final_df.index) > 0:
+    total = len(final_df.index)
+    if total > 0:
         final_df.sort_values('AvgDifference%', axis=False, ascending=False, inplace=True, na_position='last')
         final_df = final_df[final_df['AvgDifference%'] > 0]  # Remove stocks with a negative average target price
         cols = ['LowDifference%', 'AvgDifference%', 'HighDifference%']
@@ -38,7 +39,8 @@ def main():
             final_df.to_csv(f'data/dev_output_{today}.csv', index=False)
         else:
             final_df.to_csv(f'data/output_{today}.csv', index=False)
-        print(f'Analysis complete for {len(final_df.index)} stocks')
+        print(f'Analysis complete for {total} stocks.'
+              f'\n{total - len(final_df.index)} stock(s) excluded due to negative risk factor.')
 
 
 if __name__ == '__main__':
