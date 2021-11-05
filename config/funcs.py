@@ -1,10 +1,25 @@
 ### Functions ###
-from time import time, sleep
+from time import time, sleep, asctime, localtime
+from math import floor
 import pandas as pd
 import numpy as np
 import requests
 import json
 import os
+
+
+def ex_time(start):
+    end = time()
+    total = end - start
+    hr = total / 3600
+    mins = (hr - int(hr)) * 60
+    sec = (mins - int(mins)) * 60
+    if total < 60:
+        print(f"Complete in {round(total, 3)} seconds on {asctime(localtime())}.\n")
+    elif total > 3600:
+        print(f"Complete in {floor(hr)} hours, {floor(mins)} minutes, and {sec} seconds on {asctime(localtime())}.\n")
+    else:
+        print(f"Complete in {floor(min)} minutes and {sec} seconds on {asctime(localtime())}.\n")
 
 
 def wait_time(start):
@@ -17,12 +32,12 @@ def wait_time(start):
         return 0
 
 
-def get_info(tickers, dev):
+def get_info(tickers):
     final_df = pd.DataFrame(columns=['Ticker', 'Name', 'PreviousClose', 'LowTargetPrice', 'AvgTargetPrice',
                                      'HighTargetPrice', 'LowDifference%', 'AvgDifference%', 'HighDifference%',
                                      'LowDifference', 'AvgDifference', 'HighDifference', 'Risk', 'Recommendation',
                                      'NumberOfAnalysts'])
-    headers = {'x-rapidapi-key': os.environ.get('YAHOO_API_KEY'), 'x-rapidapi-host': os.environ.get('YAHOO_API_HOST')}
+    headers = {'x-rapidapi-key': os.getenv('YAHOO_API_KEY'), 'x-rapidapi-host': os.getenv('YAHOO_API_HOST')}
     for count, tick in enumerate(tickers):
         start = time()
         response = requests.get(
@@ -70,11 +85,8 @@ def get_info(tickers, dev):
             break
         # Stops before limit is reached if testing for further development is needed
         elif int(response.headers['x-ratelimit-requests-remaining']) <= 50:
-            if dev:
-                print(f'{int(response.headers["x-ratelimit-requests-remaining"])}')
-            else:
-                print(f'Stopping at 50 or less requests remaining.')
-                break
+            print(f'Stopping at 50 or less requests remaining.')
+            break
         # Break if the status code is in the 400's
         elif (int(response.status_code) >= 400) and (int(response.status_code) < 500):
             break
