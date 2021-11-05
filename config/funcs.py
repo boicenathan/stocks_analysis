@@ -39,7 +39,7 @@ def get_info(tickers):
                                      'NumberOfAnalysts'])
     headers = {'x-rapidapi-key': os.getenv('YAHOO_API_KEY'), 'x-rapidapi-host': os.getenv('YAHOO_API_HOST')}
     for count, tick in enumerate(tickers):
-        start = time()
+        rstart = time()
         response = requests.get(
             f'https://yh-finance.p.rapidapi.com/stock/v2/get-analysis?symbol={tick}&region=US',
             headers=headers,
@@ -77,7 +77,7 @@ def get_info(tickers):
                 print(f'KeyError: {error} for {tick}')
                 continue
             # Waiting if faster than .2 seconds
-            sleep(wait_time(start))
+            sleep(wait_time(rstart))
         # If request limit is reached
         elif int(response.status_code) == 429:
             reset = round(int(response.headers['X-RateLimit-requests-Reset']) / 86400, 1)
