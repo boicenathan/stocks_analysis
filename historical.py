@@ -12,17 +12,18 @@ def historic():
     paths = glob('data/output_*.csv')
     data = [pd.read_csv(p, sep=',') for p in paths]
     merged_df = pd.concat(data, ignore_index=True)
+    merged_df = merged_df[['Tick', 'Name', 'PreviousClose', 'LowTargetPrice', 'AvgTargetPrice', 'HighTargetPrice', 'Rundate']]
+    pd.options.display.float_format = "{:,.2f}".format
 
-    # Separate most recent analysis
-    merged_df['Rundate'] = pd.to_datetime(merged_df['Rundate'])
-    merged_df.sort_values(by=['Rundate'], inplace=True, ascending=False)
+    # Format and sort by rundate
+    merged_df['Rundate'] = pd.to_datetime(merged_df['Rundate']).dt.date
+    merged_df.sort_values(by=['Rundate'], inplace=True)
 
-    # Make list of tickers and start historicl analysis
-    tickers = merged_df['Ticker'].to_list()
-    analysis = historic_info(tickers, merged_df)
+    # Start historicl analysis
+    analysis = historic_info(merged_df)
 
     # Save dataframe
-    analysis.to_csv('data/Tracker.csv', index=False)
+    analysis.to_csv('data/HistoricTracker.csv', index=False)
 
 
 if __name__ == '__main__':

@@ -17,13 +17,12 @@ def main():
     symbols = symbols[(symbols['Last Sale'] >= 10) & (symbols['Last Sale'] <= 5000)]
     symbols.sort_values('Market Cap', axis=False, ascending=False, inplace=True, na_position='last')
     symbols.reset_index(drop=True, inplace=True)
-    tickers = symbols['Symbol'].to_list()
+    tickers = list(set(symbols['Symbol']))
     
     # Check if we have any requests remaining
     with Session() as session:
         ans = requests_remaining(tickers[0], session)
         tickers = tickers[:ans[2] - 51]
-
         if ans[2] > 50:
             final_df = get_info(tickers, session)  # Transform the data
             final_df.sort_values('LowDifference%', axis=False, ascending=False, inplace=True, na_position='last')
@@ -43,4 +42,4 @@ def main():
 if __name__ == '__main__':
     start = perf_counter()
     main()
-    ex_time(start, perf_counter())
+    ex_time(start)
